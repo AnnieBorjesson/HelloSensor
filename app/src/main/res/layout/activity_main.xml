@@ -30,4 +30,13 @@
         android:rotationX="0"
         android:text="Kompass" />
 
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="96dp"
+        android:text="Välj kompass eller accelerometer" />
+
 </RelativeLayout>

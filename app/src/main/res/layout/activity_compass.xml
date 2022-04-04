@@ -1,28 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:background="#fff" >
-
-<TextView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_centerHorizontal="true"
-    android:id="@+id/DegreeTV"
-    android:layout_marginBottom="40dp"
-    android:layout_marginTop="20dp"
-    android:text="Heading: 0.0"
-    android:textSize="25sp"
-    android:textStyle="normal|bold" />
-
-<ImageView
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/imageView"
-    android:layout_below="@+id/DegreeTV"
-    android:layout_centerHorizontal="true"
-    android:src="@drawable/comp_icon" />
+    tools:context=".Compass"
+    >
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:id="@+id/layout"
+        android:orientation="horizontal">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            app:srcCompat="@drawable/komp_red" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/azimuth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="149dp"
+        android:layout_marginBottom="610dp"
+        android:textSize="36sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.515"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="direction"
+        android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.509"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/azimuth" />
+
+    <TextView
+        android:id="@+id/norr"
+        android:layout_width="360dp"
+        android:layout_height="37dp"
+        android:width="600px"
+        android:gravity="center"
+        android:shadowColor="#FF1A1A"
+        android:shadowRadius="10"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/direction" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,9 +19,12 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /**Koppla till acc-layouten**/
         setContentView(R.layout.activity_acc);
+        /**Vit bakgrund**/
         getWindow().getDecorView().setBackgroundColor(Color.WHITE);
 
+        /**Koppla till layoutens id**/
         outputX = findViewById(R.id.AccX);
         outputY = findViewById(R.id.AccY);
         outputZ = findViewById(R.id.AccZ);
@@ -36,15 +39,22 @@ public class Accelerometer extends AppCompatActivity implements SensorEventListe
     public void onSensorChanged(SensorEvent event) {
         Sensor mySensor = event.sensor;
 
+        /**Avrundar med Math.round för att visa utan deciamler**/
         if(mySensor.getType() == Sensor.TYPE_ACCELEROMETER){
             outputX.setText(String.valueOf(Math.round(event.values[0])));
             outputY.setText(String.valueOf(Math.round(event.values[1])));
             outputZ.setText(String.valueOf(Math.round(event.values[2])));
         }
-        if (event.values[0] < 0 ){
+        if(outputX.equals(0) && outputY.equals(0)) {
+            lutningX.setText("Rakt");
+            getWindow().getDecorView().setBackgroundColor(Color.WHITE);
+        }
+        /**Om man lutar åt höger visas texten Höger, annars Vänster**/
+        else if (event.values[0] < 0 ) {
             lutningX.setText("Höger");
             getWindow().getDecorView().setBackgroundColor(Color.BLUE);
-        } else {
+        }
+        else {
             lutningX.setText("Vänster");
             getWindow().getDecorView().setBackgroundColor(Color.RED);
         }

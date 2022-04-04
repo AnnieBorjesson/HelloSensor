@@ -1,92 +1,159 @@
 package com.example.individuellid;
 
-import androidx.appcompat.app.AppCompatActivity;
+        import android.content.Context;
+        import android.content.Intent;
+        import android.graphics.Color;
+        import android.hardware.Sensor;
+        import android.hardware.SensorEvent;
+        import android.hardware.SensorEventListener;
+        import android.hardware.SensorManager;
+        import android.os.Build;
+        import android.os.Bundle;
+        import android.os.VibrationEffect;
+        import android.os.Vibrator;
+        import android.view.WindowManager;
+        import android.view.animation.Animation;
+        import android.view.animation.RotateAnimation;
+        import android.widget.ImageView;
+        import android.widget.LinearLayout;
+        import android.widget.TextView;
 
-import android.os.Bundle;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
-
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
-import android.hardware.SensorEvent;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.hardware.SensorEventListener;
+        import androidx.appcompat.app.AppCompatActivity;
 
 public class Compass extends AppCompatActivity implements SensorEventListener {
+    private TextView azimuth;
+    private TextView direction;
+    LinearLayout layout;
 
-    // device sensor manager
-    private SensorManager SensorManage;
+    private ImageView imageView;
 
-    // define the compass picture that will be use
-    private ImageView compassimage;
+    private SensorManager sensorManager;
+    private Sensor acceleratorSensor, magnetometerSensor;
 
-    // record the angle turned of the compass picture
-    private float DegreeStart = 0f;
+    /**X, Y, Z-värden för accelerometer, magnetometer & orientation. Matris med rotation**/
+    private float[] lastAccelerometer = new float[3];
+    private float[] lastMagnetometer = new float[3];
+    private float[] rotationMatrix = new float[9];
+    private float[] orientation = new float[3];
 
-    TextView DegreeTV;
+    boolean isLastAcceleratorArrayCopied = false;
+    boolean isLastMagnetometerArrayCopied = false;
+
+    long lastUpdatedTime = 0;
+    float currentDegree = 0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /**Visa compass-vyn när kompassen körs**/
         setContentView(R.layout.activity_compass);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        //
-        compassimage = (ImageView) findViewById(R.id.imageView);
+        /**Värdena i layouten**/
+        azimuth = findViewById(R.id.azimuth);
+        direction = findViewById(R.id.direction);
+        imageView = findViewById(R.id.imageView);
+        layout = findViewById(R.id.layout);
 
-        // TextView that will display the degree
-        DegreeTV = (TextView) findViewById(R.id.DegreeTV);
-
-        // initialize your android device sensor capabilities
-        SensorManage = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        acceleratorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public void onSensorChanged(SensorEvent event) {
+        if(event.sensor == acceleratorSensor){
+            System.arraycopy(event.values,  0, lastAccelerometer,0, event.values.length);
+            isLastAcceleratorArrayCopied = true;
+        }else if(event.sensor == magnetometerSensor){
+            System.arraycopy(event.values, 0, lastMagnetometer, 0 , event.values.length);
+            isLastMagnetometerArrayCopied = true;
+        }
 
-        // to stop the listener and save battery
-        SensorManage.unregisterListener(this);
+        if(isLastMagnetometerArrayCopied && isLastAcceleratorArrayCopied && System.currentTimeMillis() - lastUpdatedTime > 50){
+            SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
+            SensorManager.getOrientation(rotationMatrix, orientation);
+
+            float azimuthInRadian = orientation[0];
+            float azimuthInDegree = (float) Math.toDegrees(azimuthInRadian);
+
+            RotateAnimation rotateAnimation =
+                    new RotateAnimation(currentDegree, -azimuthInDegree, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            /**Styr hur snabbt den uppdateras**/
+            rotateAnimation.setDuration(50);
+            rotateAnimation.setFillAfter(true);
+            imageView.startAnimation(rotateAnimation);
+
+            currentDegree = -azimuthInDegree;
+            lastUpdatedTime = System.currentTimeMillis();
+
+            int degree = (int)(azimuthInDegree+360)%360;
+            azimuth.setText(degree + "°");
+
+            direction.setText(getDirection(degree));
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
+
+    private String getDirection(int angle){
+        String direction = "";
+
+        /**Kolla vinkeln och vibrera om norr. Ändra bakgrundsfärg och norr eller syd. Skriv ut riktningen**/
+        if (angle >= 350 || angle <= 10) {
+            direction = "N";
+            layout.setBackgroundColor(Color.GREEN);
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                v.vibrate(500);
+            }
+        }
+        if (angle < 350 && angle > 280) {
+            direction = "NW";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        if (angle <= 280 && angle > 260) {
+            direction = "W";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        if (angle <= 260 && angle > 190) {
+            direction = "SW";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        if (angle <= 190 && angle > 170) {
+            direction = "S";
+            layout.setBackgroundColor(Color.RED);
+        }
+        if (angle <= 170 && angle > 100) {
+            direction = "SE";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        if (angle <= 100 && angle > 80) {
+            direction = "E";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        if (angle <= 80 && angle > 10) {
+            direction = "NE";
+            layout.setBackgroundColor(Color.WHITE);
+        }
+        return direction;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        // code for system's orientation sensor registered listeners
-        SensorManage.registerListener(this, SensorManage.getDefaultSensor(Sensor.TYPE_ORIENTATION),
-                SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, acceleratorSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, magnetometerSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
-
-        // get angle around the z-axis rotated
-        float degree = Math.round(event.values[0]);
-
-        DegreeTV.setText("Heading: " + Float.toString(degree) + " degrees");
-
-        // rotation animation - reverse turn degree degrees
-        RotateAnimation ra = new RotateAnimation(
-                DegreeStart,
-                -degree,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-
-        // set the compass animation after the end of the reservation status
-        ra.setFillAfter(true);
-
-        // set how long the animation for the compass image will take place
-        ra.setDuration(210);
-
-        // Start animation of compass image
-        compassimage.startAnimation(ra);
-        DegreeStart = -degree;
-
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // not in use
+    protected void onPause() {
+        super.onPause();
+        sensorManager.unregisterListener(this, acceleratorSensor);
+        sensorManager.unregisterListener(this, magnetometerSensor);
     }
 }

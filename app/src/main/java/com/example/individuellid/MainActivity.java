@@ -12,7 +12,7 @@ public class MainActivity extends AppCompatActivity {
     Button compassButton;
     Button accButton;
 
-
+/**Kod från Android Studio**/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
