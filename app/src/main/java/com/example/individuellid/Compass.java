@@ -70,7 +70,7 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
             isLastMagnetometerArrayCopied = true;
         }
 
-        if(isLastMagnetometerArrayCopied && isLastAcceleratorArrayCopied && System.currentTimeMillis() - lastUpdatedTime > 50){
+        if(isLastMagnetometerArrayCopied && isLastAcceleratorArrayCopied && System.currentTimeMillis() - lastUpdatedTime > 150){
             SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
             SensorManager.getOrientation(rotationMatrix, orientation);
 
@@ -80,7 +80,7 @@ public class Compass extends AppCompatActivity implements SensorEventListener {
             RotateAnimation rotateAnimation =
                     new RotateAnimation(currentDegree, -azimuthInDegree, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
             /**Styr hur snabbt den uppdateras**/
-            rotateAnimation.setDuration(50);
+            rotateAnimation.setDuration(150);
             rotateAnimation.setFillAfter(true);
             imageView.startAnimation(rotateAnimation);
 
